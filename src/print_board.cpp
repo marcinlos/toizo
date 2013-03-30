@@ -2,6 +2,7 @@
 #include <sstream>
 #include "board.hpp"
 #include "print.hpp"
+#include "print_array.hpp"
 
 const int VISITED = 0x10000000;
 const int MARKED  = 0x20000000;
@@ -19,23 +20,5 @@ void print_field(std::ostream& stream, field f)
 
 void pretty_print(std::ostream& stream, const board& b)
 {
-    const int PAD = 10;
-    const char* BORD = LIGHT_GRAY;
-    std::stringstream sstream;
-    stream << print_n(PAD) << BORD << print_n(2 * (b.width() + 2))
-           << RESET << std::endl;
-
-    for (int i = 0; i < b.height(); ++ i)
-    {
-        sstream << print_n(PAD) << BORD << "  " << RESET;
-        for (int j = 0; j < b.width(); ++ j)
-        {
-            print_field(sstream, b[i][j]);
-        }
-        sstream << BORD << "  " << RESET << std::endl;
-    }
-
-    sstream << print_n(PAD) << BORD << print_n(2 * (b.width() + 2))
-              << RESET << std::endl;
-    stream << sstream.str();
+    print_array(print_field, stream, b);
 }

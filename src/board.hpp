@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "point.hpp"
+#include "array2d.hpp"
 
 struct field
 {
@@ -22,31 +23,12 @@ const int DEST    = 0x00000200;
 const int ID_MASK = 0x000000ff; // (1 << ID_BITS) - 1
 
 
-class board
+class board: public array2d<field>
 {
-private:
-    int width_, height_;
-    std::vector<field> buffer;
-
 public:
     board(int width, int height)
-    : width_(width), height_(height), buffer(width * height)
+    : array2d(width, height)
     { }
-
-    field* operator [](std::size_t n) { return &buffer[n * width_]; }
-    const field* operator [](std::size_t n) const { return &buffer[n * width_]; }
-
-    field operator [](const point& p) const { return (*this)[p.y][p.x]; }
-    field& operator [](const point& p) { return (*this)[p.y][p.x]; }
-
-    int width() const { return width_; }
-    int height() const { return height_; }
-
-    bool inside(const point& p) const
-    {
-        return p.x >= 0 && p.x < width_
-            && p.y >= 0 && p.y < height_;
-    }
 
     bool can_go(const point& p, int id) const
     {

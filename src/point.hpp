@@ -5,7 +5,7 @@
 #include <iostream>
 
 
-enum dir { UP, RIGHT, DOWN, LEFT };
+enum dir { UP, RIGHT, DOWN, LEFT, NO_DIR };
 
 
 inline dir& operator ++ (dir& d)
@@ -15,7 +15,7 @@ inline dir& operator ++ (dir& d)
 
 inline dir reverse(dir d)
 {
-    return static_cast<dir>(d ^ 1);
+    return static_cast<dir>(d ^ 2);
 }
 
 struct point
@@ -79,6 +79,11 @@ inline dir approx_dir(const point& src, const point& dest)
         return dist.x > 0 ? RIGHT : LEFT;
     else
         return dist.y > 0 ? UP : DOWN;
+}
+
+inline point move(const point& p, dir d)
+{
+    return p + UNIT[d];
 }
 
 
