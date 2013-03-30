@@ -3,6 +3,7 @@
 #include <vector>
 #include <list>
 #include <stack>
+#include <string>
 #include "print.hpp"
 #include "point.hpp"
 #include "board.hpp"
@@ -31,11 +32,7 @@ void solve(Solver s, const problem& p)
     pretty_print(std::cout, b);
 }
 
-solver choose_solver(int args, char* argv[])
-{
-    return simple_solve;
-}
-
+solver choose_solver(int argc, char* argv[]);
 void parse_input(std::istream& input, problem& p);
 
 
@@ -46,6 +43,25 @@ int main(int argc, char* argv[])
     solver s = choose_solver(argc, argv);
     solve(s, p);
     return 0;
+}
+
+solver choose_solver(int argc, char* argv[])
+{
+    if (argc < 2)
+        return solvers::simple;
+    std::string opt(argv[1]);
+    if (opt == "-s" || opt == "--simple")
+        return solvers::simple;
+    if (opt == "-p" || opt == "--pruning")
+        return solvers::pruning;
+    else if (opt == "-P" || opt == "--parallel")
+        return solvers::parallel;
+    else
+    {
+        std::cerr << "Invalid solver" << std::endl;
+        std::exit(-1);
+    }
+    return NULL;
 }
 
 void parse_input(std::istream& input, problem& p)

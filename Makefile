@@ -15,8 +15,11 @@ vpath %.cpp ${srcdir}
 
 PROGRAMS = solver
 
-solver_SRCS = main.cpp print_board.cpp \
-	simple_solver.cpp
+solver_SRCS = main.cpp print_board.cpp board.cpp \
+	solvers/simple.cpp \
+	solvers/prefer_outside.cpp \
+	solvers/parallel.cpp \
+	solvers/pruning.cpp
 
 all_LDFLAGS =
 

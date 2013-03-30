@@ -3,11 +3,13 @@
 #include "board.hpp"
 #include "print.hpp"
 
+const field VISITED = 0x10000000;
+const field MARKED  = 0x20000000;
 
 void print_field(std::ostream& stream, field f)
 {
     int bg = (f | (f >> ID_BITS)) & ID_MASK;
-    const char* text = (f & SOURCE) != 0 ? "^^" : (f & DEST) != 0 ? "$$" : "  ";
+    const char* text = (f & VISITED) != 0 ? "@@" : (f & SOURCE) != 0 ? "^^" : (f & DEST) != 0 ? "$$" : "  ";
     stream << COLORS[bg] << text << RESET;
 }
 
@@ -22,7 +24,6 @@ void pretty_print(std::ostream& stream, const board& b)
 
     for (int i = 0; i < b.height(); ++ i)
     {
-
         sstream << print_n(PAD) << BORD << "  " << RESET;
         for (int j = 0; j < b.width(); ++ j)
         {

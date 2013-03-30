@@ -6,11 +6,11 @@
 
 typedef int field;
 
-const int ID_BITS = 12;
+const int ID_BITS = 8;
 
-const int SOURCE  = 0x40000000;
-const int DEST    = 0x80000000;
-const int ID_MASK = 0x00000fff; // (1 << ID_BITS) - 1
+const int SOURCE  = 0x00010000;
+const int DEST    = 0x00020000;
+const int ID_MASK = 0x000000ff; // (1 << ID_BITS) - 1
 
 inline int special_id(field f)
 {
@@ -57,6 +57,8 @@ public:
 };
 
 void pretty_print(std::ostream& stream, const board& b);
+
+bool reachable(board& b, point src, point dst, int id);
 
 
 #endif /* BOARD_HPP_ */

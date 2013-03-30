@@ -5,7 +5,16 @@
 #include "data.hpp"
 #include "board.hpp"
 
-bool simple_solve(board& b, const problem& agents);
+#define SOLVER(s) bool s(board&, const problem&)
 
+namespace solvers
+{
+
+SOLVER(simple);
+SOLVER(prefer_outside);
+SOLVER(parallel);
+SOLVER(pruning);
+
+}
 
 #endif /* SOLVERS_HPP_ */
