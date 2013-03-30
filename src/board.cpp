@@ -1,14 +1,14 @@
 #include <queue>
 #include "board.hpp"
 
-const field VISITED = 0x10000000;
-const field MARKED  = 0x20000000;
+const short VISITED = 0x1000;
+const short MARKED  = 0x2000;
 
-const field TOUCHED = VISITED | MARKED;
+const int TOUCHED = VISITED | MARKED;
 
 static bool is_clean(field f)
 {
-    return (f & TOUCHED) == 0;
+    return (f.flags & TOUCHED) == 0;
 }
 
 static void clean_marks(board& b)
@@ -16,7 +16,7 @@ static void clean_marks(board& b)
     for (int i = 0; i < b.height(); ++ i)
     {
         for (int j = 0; j < b.width(); ++ j)
-            b[i][j] &= ~TOUCHED;
+            b[i][j].flags &= ~TOUCHED;
     }
 }
 
@@ -42,7 +42,7 @@ bool reachable(board& b, point src, point dst, int id)
             point p2 = p + UNIT[i];
             if (b.can_go(p2, id) && is_clean(b[p2]))
             {
-                b[p2] |= VISITED;
+                b[p2].flags |= VISITED;
                 q.push(p2);
             }
         }

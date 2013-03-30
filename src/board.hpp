@@ -4,18 +4,22 @@
 #include <vector>
 #include "point.hpp"
 
-typedef int field;
+struct field
+{
+    short color;
+    short flags;
+    int extra;
+
+    field()
+    : color(0), flags(0), extra(0)
+    { }
+};
 
 const int ID_BITS = 8;
 
-const int SOURCE  = 0x00010000;
-const int DEST    = 0x00020000;
+const int SOURCE  = 0x00000100;
+const int DEST    = 0x00000200;
 const int ID_MASK = 0x000000ff; // (1 << ID_BITS) - 1
-
-inline int special_id(field f)
-{
-    return (f >> ID_BITS) & ID_MASK;
-}
 
 
 class board
@@ -49,8 +53,8 @@ public:
         if (inside(p))
         {
             field f = (*this)[p];
-            int special = (f >> ID_BITS) & ID_MASK;
-            return (f & ID_MASK) == 0 && (special == 0 || special == id);
+            int special = f.extra & ID_MASK;
+            return f.color == 0 && (special == 0 || special == id);
         }
         return false;
     }

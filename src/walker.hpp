@@ -21,7 +21,7 @@ struct walker
         if (b.can_go(p, id))
         {
             pos = p;
-            b[p] |= id;
+            b[p].color = id;
             moves.push(d);
             return true;
         }
@@ -31,7 +31,7 @@ struct walker
 
     void back()
     {
-        b[pos] &= ~id;
+        b[pos].color = 0;
         dir last = moves.top();
         moves.pop();
         pos -= UNIT[last];

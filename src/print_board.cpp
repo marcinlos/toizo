@@ -3,13 +3,16 @@
 #include "board.hpp"
 #include "print.hpp"
 
-const field VISITED = 0x10000000;
-const field MARKED  = 0x20000000;
+const int VISITED = 0x10000000;
+const int MARKED  = 0x20000000;
 
 void print_field(std::ostream& stream, field f)
 {
-    int bg = (f | (f >> ID_BITS)) & ID_MASK;
-    const char* text = (f & VISITED) != 0 ? "@@" : (f & SOURCE) != 0 ? "^^" : (f & DEST) != 0 ? "$$" : "  ";
+    int bg = (f.color | f.extra) & ID_MASK;
+    const char* text =
+        (f.extra & VISITED) != 0 ? "@@" :
+        (f.extra & SOURCE) != 0 ? "^^" :
+        (f.extra & DEST) != 0 ? "$$" : "  ";
     stream << COLORS[bg] << text << RESET;
 }
 
