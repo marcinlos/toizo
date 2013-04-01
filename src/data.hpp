@@ -14,4 +14,10 @@ struct problem
     std::vector<agent> agents;
 };
 
+struct result
+{
+    long calls;
+    bool found;
+};
+
 #endif /* DATA_HPP_ */

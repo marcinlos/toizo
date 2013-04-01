@@ -22,6 +22,14 @@ struct point
 {
     int x, y;
 
+    point()
+    : x(0), y(0)
+    { }
+
+    point(int x, int y)
+    : x(x), y(y)
+    { }
+
     point& operator += (const point& p)
     {
         x += p.x;
@@ -64,7 +72,7 @@ inline std::ostream& operator << (std::ostream& stream, const point& p)
     return stream << "(" << p.x << ", " << p.y << ")";
 }
 
-const point UNIT[] = { {0, 1}, {1, 0}, {0, -1}, {-1, 0} };
+const point UNIT[] = { point(0, 1), point(1, 0), point(0, -1), point(-1, 0) };
 
 const point VEC_UP = UNIT[0];
 const point VEC_RIGHT = UNIT[1];

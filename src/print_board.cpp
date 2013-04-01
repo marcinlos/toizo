@@ -10,6 +10,8 @@ const int MARKED  = 0x20000000;
 void print_field(std::ostream& stream, field f)
 {
     int bg = (f.color | f.extra) & ID_MASK;
+    if (bg != 0)
+        bg = 1 + (bg - 1) % COLOR_NUM;
     const char* text =
         (f.extra & VISITED) != 0 ? "@@" :
         (f.extra & SOURCE) != 0 ? "^^" :

@@ -70,15 +70,16 @@ struct parallel_
     parallel_(int N): N(N) { }
 
     template <typename Iter>
-    bool operator()(Iter begin, Iter end)
+    result operator()(Iter begin, Iter end)
     {
         parallel_aux_<Iter> p(begin, end);
-        return p.search(begin);
+        result r = {0, p.search(begin)};
+        return r;
     }
 };
 
 
-bool parallel(board& b, const problem& p)
+result parallel(board& b, const problem& p)
 {
     return detail::solve_aux(parallel_(p.agents.size()), b, p);
 }

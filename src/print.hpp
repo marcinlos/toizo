@@ -18,6 +18,8 @@ const char* const COLORS[] = {
     "\u001B[1;47m",
 };
 
+const int COLOR_NUM = sizeof(COLORS) / sizeof(COLORS[0]) - 1;
+
 const char* const BLUE          = COLORS[1];
 const char* const GREEN         = COLORS[2];
 const char* const CYAN          = COLORS[3];

@@ -12,7 +12,7 @@ namespace detail
 {
 
 template <typename Solver>
-bool solve_aux(Solver s, board& b, const problem& p)
+result solve_aux(Solver s, board& b, const problem& p)
 {
     std::list<walker> walkers;
     typedef std::vector<agent>::const_iterator iter;

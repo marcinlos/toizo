@@ -5,7 +5,7 @@
 #include "data.hpp"
 #include "board.hpp"
 
-#define SOLVER(s) bool s(board&, const problem&)
+#define SOLVER(s) result s(board&, const problem&)
 
 namespace solvers
 {

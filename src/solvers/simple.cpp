@@ -12,17 +12,18 @@ template <typename Iter>
 struct simple_impl_
 {
     Iter begin, end;
-    unsigned long calls;
+    long calls;
 
     simple_impl_(Iter begin, Iter end)
     : begin(begin), end(end), calls(0)
     { }
 
-    bool compute()
+    result compute()
     {
         bool res = run(begin);
         std::cout << "Calls: " << calls << std::endl;
-        return res;
+        result r = {calls, res};
+        return r;
     }
 
     bool run(Iter it)
@@ -53,7 +54,7 @@ struct simple_impl_
 struct simple_
 {
     template <typename Iter>
-    bool operator()(Iter begin, Iter end)
+    result operator()(Iter begin, Iter end)
     {
         simple_impl_<Iter> s(begin, end);
         return s.compute();
@@ -61,7 +62,7 @@ struct simple_
 };
 
 
-bool simple(board& b, const problem& p)
+result simple(board& b, const problem& p)
 {
     return detail::solve_aux(simple_(), b, p);
 }

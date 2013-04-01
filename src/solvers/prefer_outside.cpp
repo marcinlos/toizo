@@ -9,21 +9,29 @@ namespace solvers
 struct prefer_outside_
 {
     template <typename Iter>
-    bool operator ()(Iter begin, Iter end)
+    result operator ()(Iter begin, Iter end)
+    {
+        bool res = solve(begin, end);
+        result r = {0, res};
+        return r;
+    }
+
+    template <typename Iter>
+    bool solve(Iter begin, Iter end)
     {
         if (begin == end)
             return true;
         walker& w = *begin;
         if (w.done())
         {
-            return (*this)(++ begin, end);
+            return solve(++ begin, end);
         }
         dir d = approx_dir(w.pos, w.dest);
         for (int i = 0; i < 4; ++ i, ++ d)
         {
             if (w.go(d))
             {
-                if ((*this)(begin, end))
+                if (solve(begin, end))
                     return true;
                 else
                     w.back();
@@ -33,7 +41,7 @@ struct prefer_outside_
     }
 };
 
-bool prefer_outside(board& b, const problem& p)
+result prefer_outside(board& b, const problem& p)
 {
     return detail::solve_aux(prefer_outside_(), b, p);
 }
