@@ -125,7 +125,7 @@ struct pruning_impl_
             return run(++it);
         if (adjacent_count(it->pos, it->id) > 1)
             return false;
-        if (! remaining_agents_reachable(it))
+        if (! old_remaining_agents_reachable(it))
             return false;
         dir d = UP;
         for (int i = 0; i < 4; ++ i, ++ d)
@@ -164,19 +164,6 @@ struct pruning_impl_
      */
     bool remaining_agents_reachable(Iter it)
     {
-        Iter it2 = it;
-        bool unr = false;
-        while (it2 != end)
-        {
-            if (! reachable(board_, it2->pos, it2->dest, it2->id))
-            {
-                unr = true;
-                break;
-            }
-            ++ it2;
-        }
-        //return true;
-
         compute_connected_components();
         bool unreachable = false;
         while (it != end)
@@ -185,33 +172,33 @@ struct pruning_impl_
             if (!data[dest].reachable_from(data[pos]))
             {
                 unreachable = true;
-                break;
+                dir d = UP;
+                for (int i = 0; i < 4; ++ i, ++ d)
+                {
+                    if (move(pos, d) == dest)
+                    {
+                        unreachable = false;
+                        break;
+                    }
+                }
+                if (unreachable)
+                    break;
             }
             ++ it;
         }
-        if (unr != unreachable)
-        {
-            std::cout << "No kurwa :/ unr=" << unr << ", unreachable=" << unreachable << std::endl;
-            if (unr)
-                std::cout << "Looser: " << it2->id << " " << std::endl;
-            if (unreachable)
-            {
-                std::cout << "Looser: " << it->id << " " << std::endl;
-                std::cout << "Src: " << data[it->pos].component << " / "
-                        << data[it->pos].neighbours[0]
-                        << data[it->pos].neighbours[1]
-                        << data[it->pos].neighbours[2] << std::endl;
-                std::cout << "Dst: " << data[it->dest].component << " / "
-                        << data[it->dest].neighbours[0]
-                        << data[it->dest].neighbours[1]
-                        << data[it->dest].neighbours[2]<< std::endl;
-            }
-                print_array(printer_(), std::cout, data);
-            pretty_print(std::cout, board_);
-        }
         clear_data();
         return !unreachable;
+    }
 
+    bool old_remaining_agents_reachable(Iter it)
+    {
+        while (it != end)
+        {
+            if (! reachable(board_, it->pos, it->dest, it->id))
+                return false;
+            ++ it;
+        }
+        return true;
     }
 
     /**
@@ -226,7 +213,7 @@ struct pruning_impl_
             point q = move(p, d);
             if (board_.inside(q))
             {
-                if (board_[q].color == id)
+                if (board_[q].color == id && board_[q].is(USED))
                     ++ count;
             }
         }
@@ -240,11 +227,26 @@ struct pruning_impl_
         {
             for (int j = 0; j < board_.width(); ++ j)
             {
-                if (! data[i][j].visited() && board_[i][j].color == 0 && (board_[i][j].extra & DEST) == 0)
-                    calculate_component_(point(j, i), id ++);
+                //if (! data[i][j].visited() && board_[i][j].color == EMPTY)
+                /*if (calculation_needed_(i, j))
+                    calculate_component_(point(j, i), id ++);*/
+                if (! data[i][j].visited())
+                {
+                    if (board_[i][j].color == EMPTY)
+                        calculate_component_(point(j, i), id++);
+//                    else if (board_[i][j].is(DEST))
+//                        calculate_component_(point(j, i), id++);
+
+                }
             }
         }
         //std::cout << id << std::endl;
+    }
+
+    bool calculation_needed_(int i, int j)
+    {
+        return ! data[i][j].visited() &&
+                (board_[i][j].color == EMPTY || (board_[i][j].is(DEST)));
     }
 
     struct printer_
@@ -252,11 +254,14 @@ struct pruning_impl_
         void operator ()(std::ostream& stream, const vertex_data& v)
         {
             if (v.component != 0)
+            {
                 stream << COLORS[1 + (v.component - 1) % COLOR_NUM];
-            //else if (v.neighbour != 0)
-            //    stream << COLORS[2 + (v.neighbour - 1) % (COLOR_NUM - 1)];
-            //stream << v.component << v.neighbour;
-            stream << "  ";
+                stream << ' ' << v.component;
+            }
+            else if (v.neighbours[0] != 0)
+                stream << v.neighbours[0] << v.neighbours[1];
+            else
+                stream << "  ";
             stream << RESET;
         }
     };
@@ -284,20 +289,13 @@ struct pruning_impl_
                     continue;
                 if (!data[p2].visited())
                 {
-                    if (board_[p2].color == 0)
+                    if (board_[p2].color == EMPTY)
                     {
-                        if (board_[p2].extra == 0)
-                        {
-                            data[p2].component = id;
-                            q.push(p2);
-                        }
-                        else
-                            data[p2].add_neighbour(id);
+                        data[p2].component = id;
+                        q.push(p2);
                     }
-                    else if (board_[p2].is(OCCUPIED))
-                    {
+                    else if (board_[p2].is(DEST | OCCUPIED))
                         data[p2].add_neighbour(id);
-                    }
                 }
                 //else
                 //    data[p2].add_neighbour(id);
@@ -331,7 +329,7 @@ struct pruning_impl_
                 point p2 = move(p, d);
                 if (p2 == src)
                     return reverse(d);
-                if (board_.can_go(p2, id) && !v[p2].visited)
+                if (board_.can_enter(p2, id) && !v[p2].visited)
                 {
                     v[p2].visited = true;
                     q.push(p2);

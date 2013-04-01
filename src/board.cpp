@@ -40,7 +40,7 @@ bool reachable(board& b, point src, point dst, int id)
         for (int i = 0; i < 4; ++ i)
         {
             point p2 = p + UNIT[i];
-            if (b.can_go(p2, id) && is_clean(b[p2]))
+            if (b.can_enter(p2, id) && is_clean(b[p2]))
             {
                 b[p2].flags |= VISITED;
                 q.push(p2);

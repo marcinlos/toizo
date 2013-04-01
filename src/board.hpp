@@ -9,10 +9,9 @@ struct field
 {
     short color;
     short flags;
-    int extra;
 
     field()
-    : color(0), flags(0), extra(0)
+    : color(0), flags(0)
     { }
 
     void set(short flag) { flags |= flag; }
@@ -20,13 +19,11 @@ struct field
     void clear(short flag) { flags &= ~flag; }
 };
 
-const int ID_BITS = 8;
+const short EMPTY = 0;
 
-const int SOURCE  = 0x00000100;
-const int DEST    = 0x00000200;
-const int ID_MASK = 0x000000ff; // (1 << ID_BITS) - 1
-
-const short END = 0x0001;
+const short USED    = 0x0001;
+const short SOURCE  = 0x0020;
+const short DEST    = 0x0040;
 
 
 class board: public array2d<field>
@@ -41,19 +38,32 @@ public:
         if (inside(p))
         {
             const field& f = (*this)[p];
-            bool endpoint = (f.extra & ID_MASK) != 0;
+            bool endpoint = f.is(DEST);
             return f.color == 0 && ! endpoint;
         }
         return false;
     }
 
-    bool can_go(const point& p, int id) const
+    bool is_his_dest_nopos_(const point& p, int id) const
+    {
+        const field& f = (*this)[p];
+        return f.is(DEST) && f.color == id;
+    }
+
+    bool is_his_dest(const point& p, int id) const
+    {
+        if (inside(p))
+            return is_his_dest_nopos_(p, id);
+        else
+            return false;
+    }
+
+    bool can_enter(const point& p, int id) const
     {
         if (inside(p))
         {
             const field& f = (*this)[p];
-            int special = f.extra & ID_MASK;
-            return f.color == 0 && (special == 0 || special == id);
+            return f.color == EMPTY || is_his_dest(p, id);
         }
         return false;
     }

@@ -24,9 +24,10 @@ void solve(Solver s, const problem& p)
     for (unsigned i = 0; i < p.agents.size(); ++ i)
     {
         int id = i + 1;
-        b[p.agents[i].src].extra = id | SOURCE;
         b[p.agents[i].src].color = id;
-        b[p.agents[i].dest].extra = id | DEST;
+        b[p.agents[i].src].set(SOURCE);
+        b[p.agents[i].dest].color = id;
+        b[p.agents[i].dest].set(DEST);
     }
 
     pretty_print(std::cout, b);

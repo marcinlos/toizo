@@ -4,7 +4,7 @@
 #include <stack>
 #include "board.hpp"
 
-const short OCCUPIED = 0x0002;
+const short OCCUPIED = 0x0100;
 
 struct walker
 {
@@ -23,12 +23,12 @@ struct walker
     bool go(dir d)
     {
         point p = pos + UNIT[d];
-        if (b.can_go(p, id))
+        if (b.can_enter(p, id))
         {
             b[pos].clear(OCCUPIED);
             pos = p;
             b[p].color = id;
-            b[p].set(OCCUPIED);
+            b[p].set(OCCUPIED | USED);
             moves.push(d);
             return true;
         }
@@ -38,8 +38,9 @@ struct walker
 
     void back()
     {
-        b[pos].color = 0;
-        b[pos].clear(OCCUPIED);
+        if (! b[pos].is(DEST))
+            b[pos].color = EMPTY;
+        b[pos].clear(OCCUPIED | USED);
         dir last = moves.top();
         moves.pop();
         pos -= UNIT[last];
