@@ -22,9 +22,11 @@ struct field
 const short EMPTY = 0;
 
 const short USED    = 0x0001;
-const short SOURCE  = 0x0020;
-const short DEST    = 0x0040;
+const short SOURCE  = 0x0002;
+const short DEST    = 0x0004;
 
+const short CUSTOM  = 0x0008;
+const short MARKED  = 0x0010;
 
 class board: public array2d<field>
 {

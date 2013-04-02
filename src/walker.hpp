@@ -17,7 +17,7 @@ struct walker
     walker(int id, board& b, const point& pos, const point& dest)
     : id(id), b(b), pos(pos), dest(dest)
     {
-        b[pos].set(OCCUPIED);
+        b[pos].set(OCCUPIED | USED);
     }
 
     bool go(dir d)

@@ -5,8 +5,6 @@
 #include "print.hpp"
 #include "print_array.hpp"
 
-const int VISITED = 0x10000000;
-const int MARKED  = 0x20000000;
 
 void print_field(std::ostream& stream, const field& f)
 {
@@ -16,7 +14,9 @@ void print_field(std::ostream& stream, const field& f)
     const char* text =
         f.is(SOURCE) ? "^^" :
         f.is(DEST) ? "$$" :
-        f.is(OCCUPIED) ? " *" : "  ";
+        f.is(OCCUPIED) ? " *" :
+        f.is(USED) ? " ." :
+        f.is(CUSTOM) ? "##" : "  ";
     stream << COLORS[bg] << text << RESET;
 }
 

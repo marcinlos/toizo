@@ -12,12 +12,33 @@
 #include "board.hpp"
 #include "walker.hpp"
 #include "solvers.hpp"
+#include "solvers/pruning.hpp"
 
+typedef result (*solver)(board&, const problem&, const pruning_options&);
 
-typedef result (*solver)(board&, const problem&);
+struct rand_options
+{
+    int width;
+    int height;
+    int agents;
+};
+
+struct program_options
+{
+    bool random;
+    std::string file;
+    rand_options rand_opts;
+    pruning_options prun_opts;
+
+    program_options()
+    : random(false)
+    , file("last")
+    { }
+};
+
 
 template <typename Solver>
-void solve(Solver s, const problem& p)
+void solve(Solver s, const problem& p, const pruning_options& opts)
 {
     board b(p.width, p.height);
     std::list<walker> walkers;
@@ -31,48 +52,111 @@ void solve(Solver s, const problem& p)
     }
 
     pretty_print(std::cout, b);
-    result res = s(b, p);
+    result res = s(b, p, opts);
     std::cerr << "Calls: " << res.calls << std::endl;
     std::cerr << "Solution: " << (res.found ? "YES" : "NO") << std::endl;
     pretty_print(std::cout, b);
 }
 
-solver choose_solver(int argc, char* argv[]);
+void init_rand();
+//solver choose_solver(int argc, char* argv[]);
 void parse_input(std::istream& input, problem& p);
 void random_problem(int N, problem& p);
 void dump_problem(std::ostream& stream, const problem& p);
 void dump_problem_to_file(const std::string& file, const problem& p);
 
+void process_args(int argc, char* argv[], program_options&  opts);
+
 
 int main(int argc, char* argv[])
 {
+    init_rand();
+    program_options opts;
+    ++ argv, -- argc;
+    process_args(argc, argv, opts);
+
     problem p;
-    -- argc, ++ argv;
-    bool rand = true;
-    if (argc > 0)
+    if (opts.random)
     {
-        std::string opt(argv[0]);
-        if (opt == "-r" || opt == "--random")
-        {
-            p.width = atoi(argv[1]);
-            p.height = atoi(argv[2]);
-            int n = atoi(argv[3]);
-            std::cout << "Generatiing " << p.width << "x" << p.height
-                      << " problem with " << n << " agents" << std::endl;
-            argc -= 4;
-            argv += 4;
-            random_problem(n, p);
-        }
-        else rand = false;
+        p.width = opts.rand_opts.width;
+        p.height = opts.rand_opts.height;
+        random_problem(opts.rand_opts.agents, p);
     }
-    if (! rand)
+    else
         parse_input(std::cin, p);
-    dump_problem_to_file("last", p);
-    solver s = choose_solver(argc, argv);
-    solve(s, p);
+    dump_problem_to_file(opts.file, p);
+    solver s = solvers::pruning;//choose_solver(argc, argv);
+    solve(s, p, opts.prun_opts);
     return 0;
 }
 
+void process_args(int argc, char* argv[], program_options&  opts)
+{
+    while (argc-- > 0)
+    {
+        std::string arg(*argv++);
+        if (arg == "-r" || arg == "--random")
+        {
+            if (argc >= 3)
+            {
+                opts.random = true;
+                opts.rand_opts.width = atoi(*argv++);
+                opts.rand_opts.height = atoi(*argv++);
+                opts.rand_opts.agents = atoi(*argv++);
+                argc -= 3;
+            }
+            else
+            {
+                std::cerr << "Error: " << arg << " requires 3 arguments\n";
+                std::exit(-1);
+            }
+        }
+        else if (arg == "--skip-adjacent")
+            opts.prun_opts.elim_adjacent = true;
+        else if (arg == "--no-skip-adjacent")
+            opts.prun_opts.elim_adjacent = false;
+        else if (arg == "--find-cut-vertices")
+            opts.prun_opts.cut_vertices = true;
+        else if (arg == "--no-find-cut-vertices")
+            opts.prun_opts.cut_vertices = false;
+        else if (arg == "--reach-bfs")
+            opts.prun_opts.per_agent_reachability = true;
+        else if (arg == "--no-reach-bfs")
+            opts.prun_opts.per_agent_reachability = false;
+        else if (arg == "--compute-components")
+            opts.prun_opts.components_reachability = true;
+        else if (arg == "--no-compute-components")
+            opts.prun_opts.components_reachability = false;
+        else
+        {
+            std::size_t n = arg.find('=');
+            if (n != std::string::npos)
+            {
+                std::string name = arg.substr(0, n), value = arg.substr(n + 1);
+                if (name == "--direction")
+                {
+                    if (value == "fixed")
+                        opts.prun_opts.direction_chooser = dir_chooser::FIXED;
+                    else if (value == "simple")
+                        opts.prun_opts.direction_chooser = dir_chooser::SIMPLE;
+                    else if (value == "bfs")
+                        opts.prun_opts.direction_chooser = dir_chooser::BFS;
+                    else if (value == "A*")
+                        opts.prun_opts.direction_chooser = dir_chooser::ASTAR;
+                    else
+                        std::cerr << "Unknown direction chooser: "
+                                  << value << "\n";
+                }
+                else
+                    std::cerr << "Unknown option " << name <<"; ignoring\n";
+            }
+            else
+                std::cerr << "Unknown option " << arg <<"; ignoring\n";
+        }
+    }
+}
+
+/*
 solver choose_solver(int argc, char* argv[])
 {
     if (argc < 1)
@@ -90,7 +174,7 @@ solver choose_solver(int argc, char* argv[])
         std::exit(-1);
     }
     return NULL;
-}
+}*/
 
 void parse_input(std::istream& input, problem& p)
 {
@@ -118,13 +202,18 @@ point rand_point(int w, int h, array2d<int>& board)
     return p;
 }
 
+void init_rand()
+{
+    timeval tv;
+    gettimeofday(&tv, NULL);
+    srand(tv.tv_usec);
+}
+
 void random_problem(int N, problem& p)
 {
     array2d<int> board(p.width, p.height);
     p.agents.resize(N);
-    timeval tv;
-    gettimeofday(&tv, NULL);
-    srand(tv.tv_usec);
+
     for (int i = 0; i < N; ++ i)
     {
         p.agents[i].src = rand_point(p.width, p.height, board);

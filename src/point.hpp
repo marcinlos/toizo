@@ -3,7 +3,9 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <utility>
 
+using namespace std::rel_ops;
 
 enum dir { UP, RIGHT, DOWN, LEFT, NO_DIR };
 
