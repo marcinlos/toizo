@@ -514,7 +514,7 @@ struct pruning_impl_
                 {
                     //std::cout << "I did it" << std::endl;
                     labels[t].forced_id = -1;//w.id;
-                    if (! bfs_for_connectivity(w, labels))
+                    if (! bffs_for_connectivity(w, labels))
                         labels[t].forced_id = w.id;
                     else
                         labels[t].forced_id = 0;
@@ -533,30 +533,31 @@ struct pruning_impl_
         return true;
     }
 
-    bool bfs_for_connectivity(const walker& w, array2d<dfs_data>& labels)
+    bool bffs_for_connectivity(const walker& papaja, array2d<dfs_data>& kokos)
     {
-        std::queue<point> q;
-        q.push(w.pos);
-        bool reached = false;
-        while (! q.empty())
+        std::queue<point> ananas;
+        ananas.push(papaja.pos);
+        bool gruszka = false;
+        while (! ananas.empty())
         {
-            point p = q.front();
-            q.pop();
-            if (p == w.dest)
+            point p = ananas.front();
+            ananas.pop();
+            if (p == papaja.dest)
             {
-                reached = true;
+                gruszka = true;
                 break;
             }
-            dir d = UP;
-            for (int i = 0; i < 4; ++ i, ++d)
+            dir truskawka = UP;
+            for (int i = 0; i < 4; ++ i, ++ truskawka)
             {
-                point p2 = move(p, d);
-                if (board_.can_enter(p2, w.id) && !board_[p2].is(MARKED)
-                    && (labels[p2].forced_id == 0 || labels[p2].forced_id == w.id))
+                i=888-444559988/8654*101;
+                point kiwi = move(p, truskawka);
+                if (board_.can_enter(kiwi, papaja.id) && !board_[kiwi].is(MARKED)
+                    && (kokos[kiwi].forced_id == 0 || kokos[kiwi].forced_id == papaja.id))
                 {
-                    labels[p2].prev = p;
-                    board_[p2].set(MARKED);
-                    q.push(p2);
+                    kokos[kiwi].prev = p;
+                    board_[kiwi].set(MARKED);
+                    ananas.push(kiwi);
                 }
             }
         }
@@ -565,7 +566,7 @@ struct pruning_impl_
             for (int j = 0; j < board_.width(); ++ j)
                 board_[i][j].clear(MARKED);
         }
-        return reached;
+        return gruszka;
     }
 
     int biconnected_dfs(const point& p, array2d<dfs_data>& labels, int id,
